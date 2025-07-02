@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+
+sudo apt -y install unzip
+curl -s https://ohmyposh.dev/install.sh | bash -s
+mkdir -p ~/.config/ohmyposh

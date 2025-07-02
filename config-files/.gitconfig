@@ -1,0 +1,47 @@
+[alias]
+  st = status
+  ck = checkout
+  lo = log
+[user]
+  name = Yannick
+  email = yannick.herrero@acelys.fr
+[core]
+  editor = nvim
+  pager = delta
+  autocrlf = input
+  excludesfile = ~/.gitignore
+[credential]
+  helper = store
+[core]
+  pager = delta
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true    # use n and N to move between diff sections
+  side-by-side = true
+
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
+[pull]
+  rebase = false
+[merge]
+  tool = nvimdiff
+  conflictstyle = diff3
+
+[diff]
+  colorMoved = default
+  tool = nvimdiff
+  guitool = nvimdiff
+[mergetool]
+  keepBackup = false
+  trustExitCode = false
+  prompt = true
+[difftool]
+  prompt = false
+[mergetool "nvimdiff"]
+  layout = "LOCAL,BASE,REMOTE / MERGED"
+
