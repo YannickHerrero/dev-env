@@ -7,8 +7,6 @@ return {
       local builtin = require("telescope.builtin")
       vim.keymap.set("n", "<leader> ", builtin.find_files, { desc = "find file" })
       vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "file grep" })
-      vim.keymap.set("n", "<leader>rm", ":%s/\\r//g<CR>", { desc = "remove ^M chars" })
-
       require("telescope").setup({
         pickers = {
           find_files = {

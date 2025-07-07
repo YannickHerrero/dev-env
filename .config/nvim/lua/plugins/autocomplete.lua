@@ -31,9 +31,10 @@ return {
           documentation = cmp.config.window.bordered(),
         },
         sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "path" },
+          { name = "copilot", group_index = 2 },
+          { name = "nvim_lsp", group_index = 2 },
+          { name = "path", group_index = 2 },
+          { name = "luasnip", group_index = 2 },
         }, {
           { name = "buffer" },
         }),
@@ -51,7 +52,7 @@ return {
     "L3MON4D3/LuaSnip",
     build = (not jit.os:find("Windows"))
         and "echo 'NOTE: jsregexp is optional, so not a big deal if it fails to build'; make install_jsregexp"
-      or nil,
+        or nil,
     dependencies = {
       "rafamadriz/friendly-snippets",
       config = function()

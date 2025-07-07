@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
 sudo apt update
-sudo apt install -y git-delta fzf tldr tmux zsh ripgrep fd-find starship
+sudo apt install -y ripgrep git-delta fzf tldr tmux zsh ripgrep fd-find fonts-noto-color-emoji
 ln -s $(which fdfind) ~/.local/bin/fd
 grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
