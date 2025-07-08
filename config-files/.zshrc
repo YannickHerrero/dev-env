@@ -46,6 +46,7 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # Aliases
 alias ls='ls --color'
 alias v='nvim'
+alias f='~/dev/dev-env/scripts/tmux-sessionizer.sh'
 
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/zen.toml)"
 eval "$(zoxide init --cmd cd zsh)"

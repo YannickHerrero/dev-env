@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-selected=$(find ~/dev -maxdepth 1 -mindepth 1 -type d | fzf)
+selected=$(
+    (
+        find ~/dev -maxdepth 1 -mindepth 1 -type d
+        if [[ -f ~/dev/dev-env/scripts/saved-folders ]]; then
+            cat ~/dev/dev-env/scripts/saved-folders
+        fi
+    ) | fzf
+)
 if [[ -z "$selected" ]]; then
     exit 0
 fi
