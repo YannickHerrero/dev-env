@@ -1,0 +1,2 @@
+-- %USERPROFILE%\.wezterm.lua
+--

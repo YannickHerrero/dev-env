@@ -1,5 +1,12 @@
 return {
-  { 'echasnovski/mini.nvim', version = '*' },
+  { "echasnovski/mini.nvim", version = "*" },
+  {
+    "echasnovski/mini.ai",
+    version = "*",
+    config = function()
+      require("mini.ai").setup({})
+    end,
+  },
   {
     "echasnovski/mini.pairs",
     event = "VeryLazy",

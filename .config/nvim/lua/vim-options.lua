@@ -23,4 +23,5 @@ opt.termguicolors = true -- True color support
 opt.undofile = true
 opt.undolevels = 10000
 opt.wrap = false -- Disable line wrap
-
+opt.scrolloff = 8 -- Lines of context
+opt.sidescrolloff = 8 -- Columns of context

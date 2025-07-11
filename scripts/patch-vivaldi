@@ -1,0 +1,151 @@
+#! /usr/bin/env bash
+
+# CSS à ajouter
+CSS_CODE='
+/* Hide Vivaldi header */
+#header {
+    display: none;
+}
+
+#titlebar #pagetitle {
+    display: none;
+}
+'
+
+# Chemin de base vers Vivaldi
+VIVALDI_BASE="/mnt/c/Users/yannick.herrero/AppData/Local/Vivaldi/Application"
+
+# Fonction pour comparer les versions (format x.y.z.w)
+version_compare() {
+    local v1=$1
+    local v2=$2
+    
+    # Convertir les versions en tableaux
+    IFS='.' read -ra V1 <<< "$v1"
+    IFS='.' read -ra V2 <<< "$v2"
+    
+    # Comparer chaque partie
+    for i in {0..3}; do
+        local num1=${V1[i]:-0}
+        local num2=${V2[i]:-0}
+        
+        if [ "$num1" -gt "$num2" ]; then
+            return 1  # v1 > v2
+        elif [ "$num1" -lt "$num2" ]; then
+            return 2  # v1 < v2
+        fi
+    done
+    
+    return 0  # v1 == v2
+}
+
+# Fonction pour trouver la version la plus récente
+find_latest_version() {
+    local latest_version=""
+    
+    if [ ! -d "$VIVALDI_BASE" ]; then
+        echo "Erreur: Répertoire Vivaldi non trouvé: $VIVALDI_BASE" >&2
+        return 1
+    fi
+    
+    # Parcourir tous les dossiers de version
+    for version_dir in "$VIVALDI_BASE"/*/; do
+        if [ -d "$version_dir" ]; then
+            version=$(basename "$version_dir")
+            
+            # Vérifier que c'est bien un numéro de version (format x.y.z.w)
+            if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                if [ -z "$latest_version" ]; then
+                    latest_version="$version"
+                else
+                    version_compare "$version" "$latest_version"
+                    if [ $? -eq 1 ]; then  # version > latest_version
+                        latest_version="$version"
+                    fi
+                fi
+            fi
+        fi
+    done
+    
+    if [ -z "$latest_version" ]; then
+        echo "Erreur: Aucune version valide trouvée" >&2
+        return 1
+    fi
+    
+    echo "$latest_version"
+    return 0
+}
+
+# Trouver la version la plus récente
+echo "=== Détection de la version Vivaldi la plus récente ==="
+echo "Recherche des versions disponibles..."
+
+LATEST_VERSION=$(find_latest_version)
+
+if [ $? -ne 0 ]; then
+    echo "Impossible de détecter la version Vivaldi"
+    exit 1
+fi
+
+echo "  Version trouvée: $LATEST_VERSION"
+echo "Version la plus récente détectée: $LATEST_VERSION"
+
+# Construire le chemin vers le fichier CSS
+CSS_FILE="$VIVALDI_BASE/$LATEST_VERSION/resources/vivaldi/style/common.css"
+
+echo "Chemin du fichier CSS: $CSS_FILE"
+
+# Vérifier que le fichier existe
+if [ ! -f "$CSS_FILE" ]; then
+    echo "Erreur: Fichier CSS non trouvé: $CSS_FILE"
+    echo "Vérification de la structure du répertoire:"
+    if [ -d "$VIVALDI_BASE/$LATEST_VERSION" ]; then
+        echo "Contenu de $VIVALDI_BASE/$LATEST_VERSION:"
+        ls -la "$VIVALDI_BASE/$LATEST_VERSION/" 2>/dev/null
+        if [ -d "$VIVALDI_BASE/$LATEST_VERSION/resources" ]; then
+            echo "Contenu de resources/:"
+            ls -la "$VIVALDI_BASE/$LATEST_VERSION/resources/" 2>/dev/null
+        fi
+    else
+        echo "Le répertoire de version n'existe pas: $VIVALDI_BASE/$LATEST_VERSION"
+    fi
+    exit 1
+fi
+
+echo "Fichier CSS trouvé avec succès!"
+
+# Vérifier si le code existe déjà
+if grep -q "Hide Vivaldi header" "$CSS_FILE" 2>/dev/null; then
+    echo "Le code CSS est déjà présent dans le fichier."
+    echo "Aucune modification nécessaire."
+    exit 0
+fi
+
+# Créer une sauvegarde avec timestamp
+BACKUP_FILE="${CSS_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+echo "Création de la sauvegarde..."
+
+if cp "$CSS_FILE" "$BACKUP_FILE"; then
+    echo "Sauvegarde créée: $BACKUP_FILE"
+else
+    echo "Erreur: Impossible de créer la sauvegarde"
+    exit 1
+fi
+
+# Ajouter le code CSS
+echo "Ajout du code CSS..."
+if echo "$CSS_CODE" >> "$CSS_FILE"; then
+    echo "✅ Code CSS ajouté avec succès!"
+    echo ""
+    echo "=== Résumé ==="
+    echo "Version Vivaldi: $LATEST_VERSION"
+    echo "Fichier modifié: $CSS_FILE"
+    echo "Sauvegarde: $BACKUP_FILE"
+    echo ""
+    echo "Redémarrez Vivaldi pour voir les changements."
+else
+    echo "❌ Erreur lors de l'ajout du code CSS"
+    echo "Restauration de la sauvegarde..."
+    cp "$BACKUP_FILE" "$CSS_FILE"
+    exit 1
+fi

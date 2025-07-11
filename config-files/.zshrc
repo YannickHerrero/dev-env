@@ -20,8 +20,11 @@ autoload -Uz compinit && compinit
 zinit cdreplay -q
 
 # Keybinds
-bindkey '^p' history-search-backward
-bindkey '^n' history-search-forward
+autoload -Uz history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "$terminfo[kcuu1]" history-beginning-search-backward-end
+bindkey "$terminfo[kcud1]" history-beginning-search-forward-end
 
 # History
 HISTSIZE=5000
@@ -49,7 +52,7 @@ alias v='nvim'
 alias f='~/dev/dev-env/scripts/tmux-sessionizer.sh'
 
 eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/zen.toml)"
-eval "$(zoxide init --cmd cd zsh)"
+eval "$(zoxide init --cmd z zsh)"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
