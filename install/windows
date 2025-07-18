@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+# Windows Configuration Deployment Runner
+# This script runs Windows-specific configuration deployment scripts via WSL
+
+script_dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+filter=""
+dry="0"
+
+while [[ $# > 0 ]]; do
+	if [[ $1 == "--dry" ]]; then
+		dry="1"
+	else
+		filter="$1"
+	fi
+	shift
+done
+
+log() {
+	if [[ $dry == "1" ]]; then
+		echo "[DRY RUN]: $@"
+	else
+		echo "$@"
+	fi
+}
+
+execute() {
+	log "execute $@"
+	if [[ $dry == "1" ]]; then
+		return
+	fi
+
+	"$@"
+}
+
+# Check if we're running in WSL
+if [[ ! -d "/mnt/c" ]]; then
+    echo "Error: This script must be run from WSL to access Windows filesystem"
+    echo "Available scripts (for manual installation):"
+    find ./components/windows -maxdepth 1 -mindepth 1 -executable -type f | sed 's|./components/windows/||'
+    exit 1
+fi
+
+cd $script_dir
+scripts=$(find ./components/windows -maxdepth 1 -mindepth 1 -executable -type f)
+
+if [[ -z "$scripts" ]]; then
+    echo "No Windows installation scripts found"
+    exit 0
+fi
+
+log "--------- Windows Config Deployment ---------"
+
+for script in $scripts; do
+	if [[ -n "$filter" ]] && ! echo "$script" | grep -q "$filter"; then
+		log "filtering $script"
+		continue
+	fi
+
+	execute ./$script
+done
+
+log "Windows configuration deployment complete!"

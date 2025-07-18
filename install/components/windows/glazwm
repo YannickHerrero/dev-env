@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# GlazeWM Windows Manager Configuration Deployment
+# This script deploys GlazeWM configuration via WSL to Windows
+
+script_dir="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
+config_source="$script_dir/../../../config/windows/glazwm"
+
+# Check if we're running in WSL
+if [[ ! -d "/mnt/c" ]]; then
+    echo "Error: This script must be run from WSL to access Windows filesystem"
+    exit 1
+fi
+
+# Get Windows username
+WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+if [[ -z "$WIN_USER" ]]; then
+    echo "Error: Could not determine Windows username"
+    exit 1
+fi
+
+# GlazeWM config directory
+GLAZWM_CONFIG_DIR="/mnt/c/Users/$WIN_USER/.glaze-wm"
+
+echo "Deploying GlazeWM configuration for user: $WIN_USER"
+
+# Create config directory if it doesn't exist
+mkdir -p "$GLAZWM_CONFIG_DIR"
+
+# Copy configuration file
+if [[ -f "$config_source/config.yaml" ]]; then
+    cp "$config_source/config.yaml" "$GLAZWM_CONFIG_DIR/config.yaml"
+    echo "✓ GlazeWM configuration deployed to $GLAZWM_CONFIG_DIR"
+else
+    echo "Error: GlazeWM config file not found at $config_source/config.yaml"
+    exit 1
+fi
+
+echo "GlazeWM configuration deployment complete!"
+echo "Note: Restart GlazeWM or reload configuration to apply changes"

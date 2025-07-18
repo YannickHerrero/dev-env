@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Qutebrowser Configuration Deployment
+# This script deploys Qutebrowser configuration via WSL to Windows
+
+script_dir="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
+config_source="$script_dir/../../../config/windows/qutebrowser"
+
+# Check if we're running in WSL
+if [[ ! -d "/mnt/c" ]]; then
+    echo "Error: This script must be run from WSL to access Windows filesystem"
+    exit 1
+fi
+
+# Get Windows username
+WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+if [[ -z "$WIN_USER" ]]; then
+    echo "Error: Could not determine Windows username"
+    exit 1
+fi
+
+# Qutebrowser config directory (typically in AppData/Roaming)
+QUTE_CONFIG_DIR="/mnt/c/Users/$WIN_USER/AppData/Roaming/qutebrowser"
+
+echo "Deploying Qutebrowser configuration for user: $WIN_USER"
+
+# Create config directory if it doesn't exist
+mkdir -p "$QUTE_CONFIG_DIR"
+
+# Copy configuration files
+if [[ -d "$config_source" ]]; then
+    # Copy main config files
+    [[ -f "$config_source/config.py" ]] && cp "$config_source/config.py" "$QUTE_CONFIG_DIR/"
+    [[ -f "$config_source/autoconfig.yml" ]] && cp "$config_source/autoconfig.yml" "$QUTE_CONFIG_DIR/"
+    [[ -f "$config_source/quickmarks" ]] && cp "$config_source/quickmarks" "$QUTE_CONFIG_DIR/"
+    
+    # Copy bookmarks directory if it exists
+    if [[ -d "$config_source/bookmarks" ]]; then
+        mkdir -p "$QUTE_CONFIG_DIR/bookmarks"
+        cp -r "$config_source/bookmarks/"* "$QUTE_CONFIG_DIR/bookmarks/"
+    fi
+    
+    # Copy catppuccin theme if it exists
+    if [[ -d "$config_source/catppuccin" ]]; then
+        mkdir -p "$QUTE_CONFIG_DIR/catppuccin"
+        cp -r "$config_source/catppuccin/"* "$QUTE_CONFIG_DIR/catppuccin/"
+    fi
+    
+    echo "✓ Qutebrowser configuration deployed to $QUTE_CONFIG_DIR"
+else
+    echo "Error: Qutebrowser config directory not found at $config_source"
+    exit 1
+fi
+
+echo "Qutebrowser configuration deployment complete!"
+echo "Note: Restart Qutebrowser to apply the new configuration"

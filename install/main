@@ -48,7 +48,9 @@ copy_file() {
     execute cp $from $to/$name
 }
 
-copy_dir .config ~/.config
-copy_file ./config-files/.tmux.conf ~
-copy_file ./config-files/.gitconfig ~
-copy_file ./config-files/.zshrc ~
+# Change to script directory and copy dotconfig
+cd "$script_dir"
+copy_dir ../config/linux/dotconfig ~/.config
+copy_file ../config/linux/home/.tmux.conf ~
+copy_file ../config/linux/home/.gitconfig ~
+copy_file ../config/linux/home/.zshrc ~

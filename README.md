@@ -8,6 +8,7 @@ A comprehensive development environment configuration for Linux/WSL2 systems, fe
 - **Tmux Setup**: Custom key bindings, session management, and project switcher
 - **Shell Environment**: Zsh with oh-my-posh prompt and smart directory navigation
 - **Automated Installation**: One-command setup for the entire environment
+- **Windows Support**: Automated Windows configuration deployment via WSL
 
 ## Quick Start
 
@@ -16,16 +17,25 @@ A comprehensive development environment configuration for Linux/WSL2 systems, fe
 git clone https://github.com/YannickHerrero/dev-env
 cd dev-env
 
+# Linux/WSL2 Installation
 # Preview what will be installed (dry run)
-./dev-env --dry
+./install/main --dry
 
 # Install the complete environment
-./dev-env
+./install/main
 
 # Or install specific components
-./run nvim    # Neovim only
-./run tmux    # Tmux only
-./run dev     # Development tools only
+./install/runner nvim    # Neovim only
+./install/runner tmux    # Tmux only
+./install/runner dev     # Development tools only
+
+# Windows Configuration (from WSL)
+# Deploy all Windows configs
+./install/windows
+
+# Deploy specific Windows app configs
+./install/windows glazwm      # GlazeWM window manager
+./install/windows qutebrowser # Qutebrowser configs
 ```
 
 ## What Gets Installed
@@ -73,27 +83,40 @@ sudo ln -s $(which fdfind) /usr/bin/fd
 
 ```
 dev-env/
-├── .config/           # Application configurations
-│   ├── nvim/         # Neovim setup with plugins
-│   └── ohmyposh/     # Prompt theme
-├── config-files/      # Dotfiles (.tmux.conf, .zshrc, .gitconfig)
-├── runs/             # Individual installation scripts
+├── install/           # Installation system
+│   ├── main          # Main installer
+│   ├── runner        # Component runner
+│   ├── windows       # Windows config deployment
+│   └── components/   # Individual installers
+│       ├── linux/    # Linux-specific installers
+│       └── windows/  # Windows-specific installers
+├── config/           # All configuration files
+│   ├── linux/        # Linux configurations
+│   │   ├── home/     # Home directory dotfiles
+│   │   └── dotconfig/ # ~/.config app configurations
+│   └── windows/      # Windows configurations
 ├── scripts/          # Utility scripts (sessionizer)
-├── dev-env           # Main setup script
-└── run              # Script runner with filtering
+└── docs/            # Documentation
 ```
 
 ## Customization
 
 The modular design allows easy customization:
-- Modify plugin configurations in `.config/nvim/lua/plugins/`
-- Adjust shell settings in `config-files/.zshrc`
-- Customize tmux behavior in `config-files/.tmux.conf`
-- Add new installation scripts to `runs/` directory
+- Modify plugin configurations in `config/linux/dotconfig/nvim/lua/plugins/`
+- Adjust shell settings in `config/linux/home/.zshrc`
+- Customize tmux behavior in `config/linux/home/.tmux.conf`
+- Add new Linux installation scripts to `install/components/linux/` directory
+- Add new Windows installation scripts to `install/components/windows/` directory
 
 ## Requirements
 
+### Linux/WSL2
 - Linux or WSL2 environment
 - Git installed
 - Sudo privileges for package installation
 - Internet connection for downloading packages and plugins
+
+### Windows (via WSL)
+- WSL2 with access to Windows filesystem (`/mnt/c`)
+- Windows applications (GlazeWM, Qutebrowser) installed separately
+- Configuration deployment handled automatically via WSL scripts
