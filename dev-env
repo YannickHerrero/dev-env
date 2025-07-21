@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Development Environment Setup Script
+# Main entry point for installing development configurations
+
+script_dir="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
+
+# Check for --windows flag
+if [[ "$1" == "--windows" ]]; then
+    shift
+    exec "$script_dir/install/windows" "$@"
+else
+    exec "$script_dir/install/linux" "$@"
+fi
