@@ -8,7 +8,7 @@ script_dir="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
 # Check for --windows flag
 if [[ "$1" == "--windows" ]]; then
     shift
-    exec "$script_dir/install/windows" "$@"
+    exec "$script_dir/setup/windows" "$@"
 else
-    exec "$script_dir/install/linux" "$@"
+    exec "$script_dir/setup/linux" "$@"
 fi
