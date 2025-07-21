@@ -1,63 +1,80 @@
 #!/usr/bin/env bash
 
-# Windows Configuration Deployment Runner
-# This script runs Windows-specific configuration deployment scripts via WSL
+# Windows Configuration Deployment Script
+# Copies Windows configuration files to their proper locations via WSL
 
-script_dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-filter=""
+script_dir="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
+config_root="$script_dir/../config/windows"
 dry="0"
+filter=""
 
 while [[ $# > 0 ]]; do
-	if [[ $1 == "--dry" ]]; then
-		dry="1"
-	else
-		filter="$1"
-	fi
-	shift
+    if [[ $1 == "--dry" ]]; then
+        dry="1"
+    else
+        filter="$1"
+    fi
+    shift
 done
 
 log() {
-	if [[ $dry == "1" ]]; then
-		echo "[DRY RUN]: $@"
-	else
-		echo "$@"
-	fi
+    if [[ $dry == "1" ]]; then
+        echo "[DRY RUN]: $@"
+    else
+        echo "$@"
+    fi
 }
 
 execute() {
-	log "execute $@"
-	if [[ $dry == "1" ]]; then
-		return
-	fi
+    log "execute $@"
+    if [[ $dry == "1" ]]; then
+        return
+    fi
+    "$@"
+}
 
-	"$@"
+copy_file() {
+    local source="$1"
+    local dest="$2"
+    local name="$3"
+    
+    if [[ -f "$source" ]]; then
+        execute mkdir -p "$(dirname "$dest")"
+        execute cp "$source" "$dest"
+    else
+        log "Warning: $name config not found: $source"
+    fi
 }
 
 # Check if we're running in WSL
 if [[ ! -d "/mnt/c" ]]; then
     echo "Error: This script must be run from WSL to access Windows filesystem"
-    echo "Available scripts (for manual installation):"
-    find ./components/windows -maxdepth 1 -mindepth 1 -executable -type f | sed 's|./components/windows/||'
     exit 1
 fi
 
-cd $script_dir
-scripts=$(find ./components/windows -maxdepth 1 -mindepth 1 -executable -type f)
-
-if [[ -z "$scripts" ]]; then
-    echo "No Windows installation scripts found"
-    exit 0
+# Get Windows username
+WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+if [[ -z "$WIN_USER" ]]; then
+    echo "Error: Could not determine Windows username"
+    exit 1
 fi
 
 log "--------- Windows Config Deployment ---------"
+log "Windows user: $WIN_USER"
 
-for script in $scripts; do
-	if [[ -n "$filter" ]] && ! echo "$script" | grep -q "$filter"; then
-		log "filtering $script"
-		continue
-	fi
+# Configuration file mappings (source -> destination)
+declare -A configs=(
+    ["glazwm"]="$config_root/glazwm/config.yaml:/mnt/c/Users/$WIN_USER/.glzr/glazewm/config.yaml"
+    ["qutebrowser"]="$config_root/qutebrowser/config.py:/mnt/c/Users/$WIN_USER/AppData/Roaming/qutebrowser/config/config.py"
+    ["wezterm"]="$config_root/wezterm/.wezterm.lua:/mnt/c/Users/$WIN_USER/.wezterm.lua"
+)
 
-	execute ./$script
+# Deploy configurations
+for name in "${!configs[@]}"; do
+    if [[ -z "$filter" || "$filter" == "$name" ]]; then
+        IFS=':' read -r source dest <<< "${configs[$name]}"
+        copy_file "$source" "$dest" "$name"
+    fi
 done
 
 log "Windows configuration deployment complete!"

@@ -33,6 +33,9 @@ config.bind('L', 'tab-next')
 config.bind('H', 'tab-prev')
 config.bind('<ctrl-shift-l>', 'tab-move +')
 config.bind('<ctrl-shift-h>', 'tab-move -')
+config.bind('x', 'tab-close')
+config.unbind('xo')
+config.unbind('xO')
 
 # Navigation
 config.bind('<Space>h', 'back')
