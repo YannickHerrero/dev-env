@@ -34,8 +34,9 @@ copy_dir() {
     to=$2
     dirs=$(find . -maxdepth 1 -mindepth 1 -type d)
     for dir in $dirs; do
-        execute rm -rf $to/$dir
-        execute cp -r $dir $to/$dir
+        dir_name=$(basename $dir)
+        execute rm -rf $to/$dir_name
+        execute cp -r $dir $to/$dir_name
     done
     popd
 }
